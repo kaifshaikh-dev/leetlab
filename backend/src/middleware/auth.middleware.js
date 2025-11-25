@@ -47,3 +47,25 @@ export const authMiddleware =  async (req, res, next) => {
  }
 };
 
+
+export const checkAdmin = (req, res, next) => {
+    try {
+
+        const userId = req.user.id;
+
+        const user = db.user.findUnique({
+            where: {id: userId},
+            select: {role: true}
+        })
+
+        if(!user || user.role !== 'ADMIN'){
+            return res.status(403).json({message: "Forbidden- You don't have admin access"});
+        }
+        
+        next();
+    } catch (error) {
+        console.error("Error in admin check middleware:", error);
+        res.status(500).json({ error: "error checking admin access" });
+        
+    }
+}
