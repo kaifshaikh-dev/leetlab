@@ -19,6 +19,11 @@ enum UserRole {
   USER
   ADMIN
 }
+enum Difficulty {
+  EASY
+  MEDIUM
+  HARD
+}
 
 enum Difficulty {
   EASY
