@@ -5,6 +5,8 @@
 // Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
 
 generator client {
+
+  
   provider = "prisma-client-js"
   output   = "../src/generated/prisma"
 }
@@ -17,6 +19,11 @@ datasource db {
 enum UserRole {
   USER
   ADMIN
+}
+enum Difficulty {
+  EASY
+  MEDIUM
+  HARD
 }
 
 enum Difficulty {
@@ -39,7 +46,7 @@ model User {
   submissions Submission[]
 
   problemsolved ProblemSolved[]
-  playlists     Playlist[]
+   playlists Playlist[]
 }
 
 model Problem {
@@ -64,8 +71,40 @@ model Problem {
 
   submissions Submission[]
 
-  solvedBy          ProblemSolved[]
+  SolvedBy ProblemSolved[]
   problemsPlaylists ProblemInPlaylist[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  problems    Problem[]
+  submissions Submission[]
+
+  problemsolved ProblemSolved[]
+}
+
+model Problem {
+  id          String     @id @default(uuid())
+  title       String
+  description String
+  difficulty  Difficulty
+  tags        String[]
+  userId      String
+  examples    Json
+  constraints String
+  hints       String?
+  editorial   String?
+
+  testscases        Json
+  codeSnippets      Json
+  referenceSolution Json
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  submissions Submission[]
+
+  SolvedBy ProblemSolved[]
 }
 
 model Submission {
@@ -126,31 +165,92 @@ model ProblemSolved {
   @@unique([userId, problemId])
 }
 
-model Playlist {
-  id          String  @id @default(uuid())
-  name        String
-  description String?
-  userId      String
+model Submission {
+  id            String  @id @default(uuid())
+  userId        String
+  problemId     String
+  sourceCode    Json
+  language      String
+  stdin         String?
+  stdout        String?
+  stderr        String?
+  compileOutput String?
+  status        String //  "Accepted", "Wrong Answer", 
+  memory        String?
+  time          String?
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  problems ProblemInPlaylist[]
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  problem Problem @relation(fields: [problemId], references: [id], onDelete: Cascade)
 
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@unique([name, userId]) // unique playlist names per user
+  testCases TestCaseResult[]
 }
 
-model ProblemInPlaylist {
-  id         String   @id @default(uuid())
-  playListId String
+model TestCaseResult {
+  id            String  @id @default(uuid())
+  submissionId  String
+  testCase      Int
+  passed        Boolean
+  stdout        String?
+  expected      String?
+  stderr        String?
+  compileOutput String?
+  status        String //  "Accepted", "Wrong Answer", 
+  memory        String?
+  time          String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  submission Submission @relation(fields: [submissionId], references: [id], onDelete: Cascade)
+
+  @@index([submissionId])
+} 
+
+model ProblemSolved {
+  id        String @id @default(uuid())
+  userId    String
+  problemId String
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  problem Problem @relation(fields: [problemId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, problemId])
+}
+
+
+model Playlist{
+  id        String   @id @default(uuid())
+  name  String
+  description String?
+  userId  String
+
+   createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  problems  ProblemInPlaylist[]
+
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([name , userId]) // unique playlist names per user
+}
+
+
+model ProblemInPlaylist{
+  id        String   @id @default(uuid())
+  playListId  String
   problemId  String
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
+    createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
-  playlist Playlist @relation(fields: [playListId], references: [id], onDelete: Cascade)
-  problem  Problem  @relation(fields: [problemId], references: [id], onDelete: Cascade)
+  playlist  Playlist @relation(fields: [playListId] , references: [id] , onDelete: Cascade)
+  problem Problem @relation(fields: [problemId] , references: [id] , onDelete: Cascade)
 
-  @@unique([playListId, problemId])
+  @@unique([playListId , problemId])
+
 }

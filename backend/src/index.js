@@ -6,7 +6,7 @@ import authRoutes from './routes/auth.routes.js';
 import executionRoutes from './routes/executeCode.routes.js';
 import submissionsRoutes from './routes/submission.routes.js';
 import playlistRoutes from './routes/playlist.routes.js';
-import cors from "cors"
+
 
 
 
