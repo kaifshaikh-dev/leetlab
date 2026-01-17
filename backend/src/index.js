@@ -6,6 +6,7 @@ import authRoutes from './routes/auth.routes.js';
 import executionRoutes from './routes/executeCode.routes.js';
 import submissionsRoutes from './routes/submission.routes.js';
 import playlistRoutes from './routes/playlist.routes.js';
+import cors from "cors"
 
 
 
@@ -13,6 +14,13 @@ import playlistRoutes from './routes/playlist.routes.js';
 dotenv.config();
 
 const app = express();
+
+app.use(
+  cors({
+    origin:"http://localhost:5173",
+    credentials: true,
+  })
+);
 
 app.use(express.json());
 app.use(cookieParser());
